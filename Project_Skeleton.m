@@ -5,8 +5,9 @@ clear; clc; close all;
 %%initial parameter: unit: m, degree, rad/sec
 r1 = 7.8*10^(-2); % m  o2o3
 r2 = 2.5*10^(-2); % m  o2a2
-r3 = 8.5*10^(-2); % m o2b2
-r4 = 
+r3 = 8.5*10^(-2); % m o2B WILL HAVE TO FUCK WITH THIS
+r4 = 8.5*10^(-2) - r3; % m remainder of o2B
+r5 = 10*10^(-2); % m BC
 % and so on ...
 
 theta2 = 0:1:360; % from 0 to 360 with step 1: [0,1,2,3,4....360]
@@ -30,7 +31,7 @@ theta5= 0:1:360;
 
 r3 = % ENTER YOUR CODE HERE %
 theta3 = % ENTER YOUR CODE HERE %
-r4 = 
+r4 = %
 % Hint: Check if the angle needs to be adjusted to its true value
 % Hint: Check this for all other angles too
 
