@@ -5,18 +5,18 @@ clear; clc; close all;
 %%initial parameter: unit: m, degree, rad/sec
 r1 = 7.8*10^(-2); % m  o2o3
 r2 = 2.5*10^(-2); % m  o2a2
-r3 = 8.5*10^(-2); % m o2B WILL HAVE TO FUCK WITH THIS
+r3 = 8.5*10^(-2);
 r4 = 8.5*10^(-2) - r3; % m remainder of o2B
 r5 = 10*10^(-2); % m BC
+r7 = 5*10^(-2); % m o2o4
 % and so on ...
 
-theta2 = 0:1:360; % from 0 to 360 with step 1: [0,1,2,3,4....360]
-dtheta2 = -30;
+theta2 = 3.66519;
+%theta2 = 0:(pi/180):(2*pi); % from 0 to 360 degrees with step 1 degree
+dtheta2 = -0.523599;
 ddtheta2 = 0; 
-
-theta3 = 0:1:360;
-theta4 = 0:1:360;
-theta5= 0:1:360;
+theta3 = 0;
+theta5 = 0;
 
 % TIPS:  
 
@@ -28,10 +28,13 @@ theta5= 0:1:360;
 % '*' is matrix multiplication
 
 %% Part 1- Calculations for kinematic variables, caculated based on loop closure eqn
+theta3 = atan((r2*sin(theta2))/(r2*cos(theta2)-r1))
+r3 = r2*sin(theta2)/(sin(theta3))
+r4 = 8.5*10^(-2) - r3
 
-r3 = % ENTER YOUR CODE HERE %
-theta3 = % ENTER YOUR CODE HERE %
-r4 = %
+theta5 = acos((-r2*sin(theta2)-r4*sin(theta3)-r7)/r5)
+
+r6 = -r2*sin(theta2)-r4*sin(theta3)-r5*sin(theta5)
 % Hint: Check if the angle needs to be adjusted to its true value
 % Hint: Check this for all other angles too
 
@@ -39,8 +42,16 @@ r4 = %
 % and solve them for dtheta3, dtheta5 & dr6
 % and the same for the second derivatives. 
 
-dtheta3 = diff(theta3); %
-ddtheta3 = diff(dtheta3); %
+dtheta3 = ((sec(theta2))^2-((r2*dtheta2*cos(theta2))/r1))/(1+(r2*sin(theta2))/r2*cos(theta2)-r1)
+
+dtheta5 = (r2*dtheta2*sin(theta2)+r4*dtheta3*sin(theta3))/(r5*sin(theta5))
+
+dr3 = (-r2*dtheta3*sin(theta2)*cos(theta3)-r2*dtheta2*sin(theta3)*cos(theta2))/sin(theta3)^2
+
+dr4 = -dr3
+
+dr6 = -r2*dtheta2*cos(theta2)-r4*dtheta3*cos(theta3)-dr4*sin(theta3)-r5*dtheta5*cos(theta5)
+
 
 % and so on
 
