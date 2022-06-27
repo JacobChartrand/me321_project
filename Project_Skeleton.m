@@ -1,199 +1,327 @@
-%% Project Skeleton Code
-
+%% ME321 Project - Jacob Chartrand, Jared Elliott, Chris Gosk
 clear; clc; close all;
 
-%%initial parameter: unit: m, degree, rad/sec
-r1 = 7.8*10^(-2); % m  o2o3
-r2 = 2.5*10^(-2); % m  o2a2
-r3 = 8.5*10^(-2);
-r4 = 8.5*10^(-2) - r3; % m remainder of o2B
-r5 = 10*10^(-2); % m BC
-r7 = 5*10^(-2); % m o2o4
-% and so on ...
+%%Fixed lengths
+r1 = 5*10^(-2); % m  o2o
+r2 = 2*10^(-2); % m  o2a
+r4 = 8.5*10^(-2); % m o3B
+r5 = 3*10^(-2); % m BC
+r7 = 10*10^(-2); % m o2o4
 
-%theta2 = 3.66519;
-theta2 = 0:(pi/180):(2*pi); % from 0 to 360 degrees with step 1 degree
-dtheta2 = -0.523599;
-ddtheta2 = 0; 
+%Driving link parameters
+theta2 = deg2rad(1):deg2rad(1):deg2rad(360); % from 0-360 degrees with step 1 degree
+dtheta2 = -10; % 10 rad/s CCW constant rotation
+ddtheta2 = 0;  % 0 rad/s^2 angular acceleration
 
+%% Part 1- Calculations for kinematic variables, loop closure eqn
 
-% TIPS:  
+%Displacments
+r3 = sqrt((r1.*r1 + r2.*r2 -2.*r2.*r1.*cos(theta2)));
+theta3 = -asin(r2.*sin(theta2)./r3)+pi;
+theta5 = acos((-r7-r4.*cos(theta3))/r5);
+r6 = -r4.*sin(theta3)-r5.*sin(theta5); 
 
-% cosd(x) - is a cosine of x, where x in degrees
-% cos(x) - is a cosine of x, where x in radians
-% using '.*' enables element-wise multiplication
-% accordingly, '.^' element-wise exponent
-% [a1 a2 a3].^[b1 b2 b3] = [a1*b1 a2*b2 a3*b3]
-% '*' is matrix multiplication
+%Velocities
+dtheta3 = -r2.*dtheta2.*cos(theta2-theta3);
+dtheta5 = -r4.*dtheta3.*sin(theta3)./(r5.*sin(theta5));
+dr3 = sqrt(r3.*r3.*dtheta3.*dtheta3+r2.*r2.*dtheta2.*dtheta2-2.*r2.*r3.*...
+        dtheta2.*dtheta3.*cos(theta3-theta2));
+dr4 = 0;
+dr6 = r4.*dtheta3.*sin(theta3-theta5)./(sin(theta5));
 
-%% Part 1- Calculations for kinematic variables, caculated based on loop closure eqn
-theta3 = atan((r2.*sin(theta2))./(r2.*cos(theta2)-r1))
-r3 = r2.*sin(theta2)./(sin(theta3))
-r4 = 8.5*10^(-2) - r3
+%Acelerations
+ddtheta3 = (-2.*dr3.*dtheta3 +r2.*dtheta2.*dtheta2.*sin(theta3-theta2))...
+        ./r3;
+ddtheta5 = (r4.*ddtheta3.*sin(theta3)+r4.*dtheta3.*dtheta3.*cos(theta3)...
+        +r5.*dtheta5.*dtheta5.*cos(theta5))./(-r5.*sin(theta5));
+ddr6 = r4.*dtheta3.*dtheta3.*sin(theta3)-r4.*ddtheta3.*cos(theta3)+r5.*...
+        dtheta5.*dtheta5.*sin(theta5)-r5.*ddtheta5.*cos(theta5);
 
-theta5 = acos((-r2.*sin(theta2)-r4.*sin(theta3)-r7)/r5)
-
-r6 = -r2.*sin(theta2)-r4.*sin(theta3)-r5.*sin(theta5)
-% Hint: Check if the angle needs to be adjusted to its true value
-% Hint: Check this for all other angles too
-
-%% Take time derivative of loop eqn (d/dt) 
-% and solve them for dtheta3, dtheta5 & dr6
-% and the same for the second derivatives. 
-
-dtheta3 = ((sec(theta2)).^2-((r2.*dtheta2.*cos(theta2))./r1))./(1+(r2.*sin(theta2))./r2.*cos(theta2)-r1)
-
-dtheta5 = (r2.*dtheta2.*sin(theta2)+r4.*dtheta3.*sin(theta3))./(r5.*sin(theta5))
-
-dr3 = (-r2.*dtheta3.*sin(theta2).*cos(theta3)-r2.*dtheta2.*sin(theta3).*cos(theta2))./sin(theta3).^2
-
-dr4 = -dr3
-
-dr6 = -r2.*dtheta2.*cos(theta2)-r4.*dtheta3.*cos(theta3)-dr4.*sin(theta3)-r5.*dtheta5.*cos(theta5)
-
-
-%and so on
 
 %% Plot vars;
 
-% Plot all desired deliverables. 
-
+for x = 1:1:360 %Mechanism Animation
 figure (1)
-plot(theta2,theta3)
-grid on;
-title('$\theta_2$ vs $\theta_3$', 'Interpreter','latex')
-xlabel('\theta_2   unit: rad')
-ylabel('\theta_3   unit: rad')
 
+%Plot fixed points
+plot (0,0,'^','MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0]) %o2
+hold on
+plot (r1,0,'^','MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0]) %o3
+hold on
+
+%Positions of joints
+%      o2   A2          o3    B                         C
+Cx = [0   r2.*cosd(x)   r1    r1+r4.*cos(theta3(x))      r1-r7 ];
+Cy = [0   r2.*sind(x)   0     r4.*sin(theta3(x))        -r6(x) ];
+
+%Connecting joints with lines
+Link2 = line([Cx(1) Cx(2)], [Cy(1) Cy(2)], 'color', 'r', 'linewidth', 2);
+Link3 = line([Cx(3) Cx(4)], [Cy(3) Cy(4)], 'color', 'b', 'linewidth', 2 );
+Link5 = line([Cx(4) Cx(5)], [Cy(4) Cy(5)], 'color', 'g', 'linewidth', 2);
+hold off
+
+%Plot wall slider block
+rectangle('Position',[-5.5*10^(-2) -r6(x)-1*10^(-2) 1*10^(-2) 2*10^(-2)],...
+    'FaceColor', [0.9290 0.6940 0.1250]);
+hold on
+set(gca,'Children',flipud(get(gca,'Children'))) %Places link5 over slider
+
+%Plot slider
+slider_height = 0.5*10^(-2);
+slider_width = 0.25*10^(-2);
+
+slider = polyshape([Cx(2)-slider_height Cx(2)-slider_height ...%X points
+    Cx(2)+slider_height Cx(2)+slider_height], ... 
+    [Cy(2)+slider_width Cy(2)-slider_width ... %Y points
+    Cy(2)-slider_width Cy(2)+slider_width]); %Slider position
+slider = rotate(slider,rad2deg(theta3(x)),[Cx(2) Cy(2)]); %Slider Rotation
+plot(slider, 'FaceColor', [0.9290 0.6940 0.1250]);
+hold off
+
+%Axis formatting
+axis equal
+axis ([-0.07 0.1 -0.12 0.12])
+
+end
+
+
+
+%theta3/dtheta3/ddtheta3 v theta 
 figure (2)
-plot(theta2,dtheta3)
-grid on;
-title('$\theta_2$ vs $\theta_3 \prime$', 'Interpreter','latex')
+plot(theta2,theta3)
+grid on
+title('$\theta_3$ vs $\theta_2$', 'Interpreter','latex')
 xlabel('\theta_2   unit: rad')
-ylabel('\theta_3 \prime  unit: rad')
+ylabel('\theta_3 unit: rad')
 
 figure (3)
-plot(theta2,theta5)
-grid on;
-title('$\theta_2$ vs $\theta_5$', 'Interpreter','latex')
-xlabel('\theta_2   unit: rad')
-ylabel('\theta_5   unit: rad')
+plot(theta2,dtheta3)
+grid on
+title('d $\theta_3$ vs $\theta_2$', 'Interpreter','latex')
+xlabel(' \theta_2   unit: rad')
+ylabel('d \theta_3 unit: rad/s')
 
 figure (4)
-plot(theta2,dtheta5)
-grid on;
-title('$\theta_2$ vs $\theta_5 \prime$', 'Interpreter','latex')
+plot(theta2, ddtheta3)
+grid on
+title('dd $\theta_3$ vs $\theta_2$', 'Interpreter','latex')
 xlabel('\theta_2   unit: rad')
-ylabel('\theta_5 \prime  unit: rad')
+ylabel('dd \theta_3 unit: rad/s^2')
 
-% and so on
+%Theta5 
+
+figure (5)
+plot(theta2,theta5)
+grid on
+title('$\theta_5$ vs $\theta_2$', 'Interpreter','latex')
+xlabel('\theta_2   unit: rad')
+ylabel('\theta_5 unit: rad')
+
+figure (6)
+plot(theta2,dtheta5)
+grid on
+title('d $\theta_5$ vs $\theta_2$', 'Interpreter','latex')
+xlabel(' \theta_2   unit: rad')
+ylabel('d \theta_5 unit: rad/s')
+
+figure (7)
+plot(theta2, ddtheta5)
+grid on
+title('dd $\theta_5$ vs $\theta_2$', 'Interpreter','latex')
+xlabel('\theta_2   unit: rad')
+ylabel('dd \theta_5 unit: rad/s^2')
+
+
+%Slider 6 displacment, Speed Accleration
+
+figure (8)
+plot(theta2,-r6)
+grid on
+title('$r6$ vs $\theta_2$', 'Interpreter','latex')
+xlabel('\theta_2   unit: rad')
+ylabel('r6 unit: m')
+
+figure (9)
+plot(theta2,-dr6)
+grid on
+title('$dr6$ vs $\theta_2$', 'Interpreter','latex')
+xlabel('\theta_2   unit: rad')
+ylabel('dr6 unit: m/s')
+
+figure (10)
+plot(theta2,-ddr6)
+grid on
+title('$ddr6$ vs $\theta_2$', 'Interpreter','latex')
+xlabel('\theta_2   unit: rad')
+ylabel('ddr6 unit: m/s^2')
  
 %*****************************************************
-% %% Part 2 - Force and Moment Calculation
-% 
-% %%initial parameters:
-% 
-% dtheta2 = -15; % theta2 dot
-% ddtheta2 = 0; % theta2 doble-dot - second derivative
-% 
-% rho = 2.7; % density, gr/cm3
-% d = 0.5;% ENTER YOUR CODE HERE %; % diameter, cm
-% 
-% m2 = pi*(d/2)^2*r2; % ENTER YOUR CODE HERE % ; % link 2, o2a2 kg
-% m3 = 
-% m5 = 
-% I_G4 = % ENTER YOUR CODE HERE %;
-% % and so on
-% 
-% 
-% M12_list = [];
-% theta2_list = [];
-% Fs_list = [];  % shaking force
-% alpha_s_list = []; % direction of a shaking force
-% Ms_list =[]; % Shaking moment
-% Fij_list = []; % Forces
-% Fij_alpha = []; % Angles at which forces are acting
-% 
-% 
-% for theta2 = 0:1:360
-% 
-%     % kinematic variables are caculated based on loop eqn
-%     r3 = % ENTER YOUR CODE HERE %;
-%     dr3 = % ENTER YOUR CODE HERE %;
-%     ddtheta3 = % ENTER YOUR CODE HERE %;
-% 
-% % and so on    
-% 
-%     B = get_ma_vector(%m_i, ... % these are the examples of the possible input
-%         % ri ... % Only include the inputs that are necessary
-%         % theta_i ...
-%         % dtheta_i ...
-%         % ddtheta_i ...
-%         % ddr_i, ...
-%         % I_Gi);
-%     
-%     A = get_A_matrix(%m_i, ... % these are the examples of the possible input
-%         % ri ... % Only include the inputs that are necessary
-%         % theta_i ...
-%         % dtheta_i ...
-%         % ddtheta_i ...
-%         % ddr_i, ...
-%         % I_Gi);
-% 
-%     x = A\ B; % Ax = B, solution for x; note that in MATLAB: A\B = B/A
-%     
-%     % M12:
-%     M12 = x(% ENTER YOUR CODE HERE%);
-%     M12_list = [M12_list; M12];
-%     
-%     Fijx = x(% ENTER YOUR CODE HERE%);
-%     Fijy = x(% ENTER YOUR CODE HERE%);
-%     
-%     % Magnitudes of all forces: 
-%     % Atan is defined on [-pi/2; pi/2]. 
-%     % This if clause will help to adjust the value of the angle 
-%     % to its true value:	
-%     Fij_list = [Fij_list; % ENTER YOUR CODE HERE%];
-% 
-%     
-%     % Directions of all forces:    
-%     fx = % ENTER YOUR CODE HERE%;
-%     fy = % ENTER YOUR CODE HERE%;
-%     alpha_f = atan(fx\fy);
-%     if fx < 0
-%         alpha_f = alpha_f + pi;
-%     end 
-%     Fij_alpha = [Fij_alpha; alpha_f];
-% 
-%     % and so on
-%     
-%   
-%     % Collecting the values of theta2:
-%     theta2_list = [theta2_list, theta2];
-%      
-%    
-%     
-% end
-% 
-% 
-% % Regular and Polar plots:
-% % Might have to transpose the Force vectors for polar plot. Do so if needed
-% % Polar plot only works with radians so will have to do it accordingly
-% 
-% figure (3)
-% plot(theta2_list,M12_list)
-% grid on;
-% title('M_{12} vs \theta_2')
-% xlabel('\theta_2   unit: degree')
-% ylabel('M12   unit: N-m')
-% 
-% 
-% % Convert degrees to the radians
-% theta2_rad = deg2rad(theta2_list);
-% 
-% figure (4)
-% polarplot(Fij_alpha,Fij_list)
-% grid on;
-% title('F_{ij} polar plot')
-% 
-% % and so on ...
+%% Part 2 - Force and Moment Calculation
+
+%%initial parameters:
+
+rho = 2700; % density, kg/m3
+d = 0.5*10^(-2); % diameter, m
+m6 = 12*10^(-2); % slider mass, kg
+m4 = 12*10^(-2); % slider mass, kg
+
+m2 = pi*(d/2)^2*r2; % link 2, o2a2 kg
+m5 = pi*(d/2)^2*r5; % link 5, BC kg
+I_2 = (1/3)*m2*(r2^2);
+%I_4 = I_s;
+I_5 = (1/3)*m5*(r5^2);
+% and so on
+
+
+M12_list = [];
+theta2_list = [];
+Fs_list = [];  % shaking force
+Fs_alpha = []; % direction of a shaking force
+Ms_list =[]; % Shaking moment
+
+
+F12_list = [];
+F13_list = [];
+F16_list = [];
+F24_list = [];
+F34_list = [];
+F35_list = [];
+F56_list = [];
+
+
+
+
+F12_alpha = [];
+F13_alpha = [];
+F24_alpha = [];
+F35_alpha = [];
+F56_alpha = [];
+
+for i = 1:1:360
+
+    % kinematic variables are caculated based on loop eqn
+    m3 = pi*(d/2)^2*r3(i); % link 3, o3a3 kg
+    
+% and so on    
+    B = get_ma_vector(m2, m3, m4, m5, m6, theta2(i), dtheta2, theta3(i), dtheta3(i), ...
+            ddtheta3(i), theta5(i), dtheta5(i), ddtheta5(i), r2, r3(i), r4, r5, ddr6(i), I_2, I_5);
+    
+    
+    A = get_A_matrix(theta2(i),theta3(i), theta5(i), r3(i), r4, r5);
+
+    x = A\ B; % Ax = B, solution for x; note that in MATLAB: A\B = B/A
+    
+    % M12:
+    M12 = x(13);
+    M12_list = [M12_list; M12];
+    
+    F12x = x(1);
+    F12y = x(2);
+    F13x = x(3);
+    F13y = x(4);
+    F16 = x(5);
+    F24x = x(6);
+    F24y = x(7);
+    F34 = x(8);
+    F35x = x(9);
+    F35y = x(10);
+    F56x = x(11);
+    F56y = x(12);
+    
+    F12 = sqrt(F12x^2 + F12y^2);
+    F13 = sqrt(F13x^2 + F13y^2);
+    F24 = sqrt(F24x^2 + F24y^2);
+    F35 = sqrt(F35x^2 + F35y^2);
+    F56 = sqrt(F56x^2 + F56y^2);
+
+    Fsx = F12x + F13x + F16;
+    Fsy = F12y + F13y;
+    Fs = sqrt(Fsx^2 + Fsy^2);
+
+    Ms = M12 + F13y*r1 - F16*r6;
+
+    % Magnitudes of all forces: 
+    F12_list = [F12_list; F12];
+    F13_list = [F13_list; F13];
+    F16_list = [F16_list; F16];
+    F24_list = [F24_list; F24];
+    F34_list = [F34_list; F34];
+    F35_list = [F35_list; F35];
+    F56_list = [F56_list; F56];
+    Fs_list = [Fs_list; Fs];
+    Ms_list = [Ms_list; Ms];
+    
+    % Directions of all forces:    
+    fx = F12x;
+    fy = F12y;
+    alpha_f = atan(fx\fy);
+    if F12x < 0
+        alpha_f = alpha_f + pi;
+    end 
+    F12_alpha = [F12_alpha; alpha_f];
+
+    fx = F13x;
+    fy = F13y;
+    alpha_f = atan(fx\fy);
+    if fx < 0
+        alpha_f = alpha_f + pi;
+    end 
+    F13_alpha = [F13_alpha; alpha_f];
+
+    fx = F24x;
+    fy = F24y;
+    alpha_f = atan(fx\fy);
+    if fx < 0
+        alpha_f = alpha_f + pi;
+    end 
+    F24_alpha = [F24_alpha; alpha_f];
+
+    fx = F35x;
+    fy = F35y;
+    alpha_f = atan(fx\fy);
+    if fx < 0
+        alpha_f = alpha_f + pi;
+    end 
+    F35_alpha = [F35_alpha; alpha_f];
+
+    fx = F56x;
+    fy = F56y;
+    alpha_f = atan(fx\fy);
+    if fx < 0
+        alpha_f = alpha_f + pi;
+    end 
+    F56_alpha = [F56_alpha; alpha_f];
+   
+    fx = Fsx;
+    fy = Fsy;
+    alpha_f = atan(fx\fy);
+    if fx < 0
+        alpha_f = alpha_f + pi;
+    end 
+    Fs_alpha = [Fs_alpha; alpha_f];
+  
+    % Collecting the values of theta2:
+    theta2_list = [theta2_list, theta2(i)];
+     
+end
+
+
+% Regular and Polar plots:
+% Might have to transpose the Force vectors for polar plot. Do so if needed
+% Polar plot only works with radians so will have to do it accordingly
+
+figure (3)
+plot(theta2_list,M12_list)
+grid on;
+title('M_{12} vs \theta_2')
+xlabel('\theta_2   unit: rad')
+ylabel('M12   unit: N-m')
+
+
+
+figure (4)
+polarplot(Fs_alpha,Fs_list)
+grid on;
+title('F_{s} polar plot')
+
+% and so on ...
