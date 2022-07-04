@@ -195,8 +195,9 @@ for i = 1:1:360
     
     %Create ma vector based on input variables at angle i
     B = get_ma_vector(m2, m3, m4, m5, m6, theta2(i), dtheta2, theta3(i),... 
-        dtheta3(i),ddtheta3(i), theta5(i), dtheta5(i), ddtheta5(i),...
-        r2, r3(i), r4, r5, ddr6(i));
+              dtheta3(i), ddtheta3(i), theta5(i), dtheta5(i), ddtheta5(i),... 
+              r2, r3(i), r4, r5, ddr6(i));
+
     
     %Create A matrix based on input variables at angle i
     A = get_A_matrix(theta2(i),theta3(i), theta5(i), r3(i), r4, r5);
@@ -234,7 +235,7 @@ for i = 1:1:360
     Fs = sqrt(Fsx^2 + Fsy^2);
 
     %Calculate shaking moment
-    Ms = M12 + F13y*r1 - F16*r6;
+    Ms = M12 + F13y*r1 - F16*r6(i);
 
     %Add force/moment to new column in respective Fij_list array 
     F12_list = [F12_list; F12];
@@ -333,9 +334,9 @@ title('F_{24} polar plot')
 figure (16)
 polarplot(F35_alpha,F35_list)
 grid on;
-title('F_{35} polar plot')
+title('F_{35} plot')
 
 figure (17)
 polarplot(F56_alpha,F56_list)
 grid on;
-title('F_{56} polar plot')
+title('F_{56} plot')

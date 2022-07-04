@@ -166,14 +166,12 @@ m6 = 12*10^(-2); % slider mass, kg
 m4 = 12*10^(-2); % slider mass, kg
 m2 = pi*(d/2)^2*r2; % link 2, o2a2 kg
 m5 = pi*(d/2)^2*r5; % link 5, BC kg
-I_2 = (1/3)*m2*(r2^2); % moment of inertia, link 2, kg*m^2
-I_5 = (1/3)*m5*(r5^2); % moment of inertia, link 5, kg*m^2
 
 M12_list = [];
-theta2_list = [];
-Fs_list = [];  % Shaking force
+Fs_list  = []; % Shaking force
 Fs_alpha = []; % Direction of shaking force
-Ms_list = []; % Shaking moment
+Ms_list  = []; % Shaking moment
+theta2_list = [];
 
 %Initializing force magnitude vectors
 F12_list = [];
@@ -192,13 +190,14 @@ F35_alpha = [];
 F56_alpha = [];
 
 for i = 1:1:360
-    %Calculate m3, changes with dtheta
+    %Calculate m3, changes with theta2
     m3 = pi*(d/2)^2*r3(i); % link 3, o3a3 kg
     
     %Create ma vector based on input variables at angle i
     B = get_ma_vector(m2, m3, m4, m5, m6, theta2(i), dtheta2, theta3(i),... 
-        dtheta3(i),ddtheta3(i), theta5(i), dtheta5(i), ddtheta5(i),...
-        r2, r3(i), r4, r5, ddr6(i), I_2, I_5);
+              dtheta3(i), ddtheta3(i), theta5(i), dtheta5(i), ddtheta5(i),... 
+              r2, r3(i), r4, r5, ddr6(i));
+
     
     %Create A matrix based on input variables at angle i
     A = get_A_matrix(theta2(i),theta3(i), theta5(i), r3(i), r4, r5);
@@ -214,10 +213,10 @@ for i = 1:1:360
     F12y = x(2);
     F13x = x(3);
     F13y = x(4);
-    F16 = x(5);
+    F16  = x(5);
     F24x = x(6);
     F24y = x(7);
-    F34 = x(8);
+    F34  = x(8);
     F35x = x(9);
     F35y = x(10);
     F56x = x(11);
@@ -246,8 +245,8 @@ for i = 1:1:360
     F34_list = [F34_list; F34];
     F35_list = [F35_list; F35];
     F56_list = [F56_list; F56];
-    Fs_list = [Fs_list; Fs];
-    Ms_list = [Ms_list; Ms];
+    Fs_list  = [Fs_list; Fs];
+    Ms_list  = [Ms_list; Ms];
     
     % Directions of all forces:    
     fx = F12x;
@@ -333,11 +332,11 @@ grid on;
 title('F_{24} polar plot')
 
 figure (16)
-polarplot(F35_alpha,F35_list)
+plot(theta2_list,F35_list)
 grid on;
 title('F_{35} polar plot')
 
 figure (17)
-polarplot(F56_alpha,F56_list)
+plot(theta2_list,F56_list)
 grid on;
 title('F_{56} polar plot')
