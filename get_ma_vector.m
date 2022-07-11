@@ -8,7 +8,6 @@ b5 = r5/2;
 
 I_3 = (1/3)*m3*r4^2;
 I_5 = (1/3)*m5*(r5^2);
-I_2 = (1/3)*m2*(r2^2);
 
 a_G2x = -b2*dtheta2^2*cos(theta2);
 a_G2y = -b2*dtheta2^2*sin(theta2);

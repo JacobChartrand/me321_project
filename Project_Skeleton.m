@@ -9,7 +9,7 @@ r5 = 3*10^(-2); % m BC
 r7 = 10*10^(-2); % m o2o4
 
 %Driving link parameters
-theta2 = deg2rad(1):deg2rad(1):deg2rad(360); % from 0-360 degrees with step 1 degree
+theta2 = deg2rad(1):deg2rad(1):deg2rad(360); % from 0-360 degrees
 dtheta2 = -10; % 10 rad/s CCW constant rotation
 ddtheta2 = 0;  % 0 rad/s^2 angular acceleration
 
@@ -297,15 +297,12 @@ for i = 1:1:360
     end 
     Fs_alpha = [Fs_alpha; alpha_f];
   
-    % Collecting the values of theta2:
-    theta2_list = [theta2_list, theta2(i)];
-     
 end
 
 % Kinetics plot deliverables
 
 figure (11)
-plot(theta2_list,Ms_list)
+plot(theta2,Ms_list)
 grid on;
 title('M_{s} vs \theta_2')
 xlabel('\theta_2   unit: rad')
