@@ -3,11 +3,11 @@ function ma = get_ma_vector(m2, m3, m4, m5, m6, theta2, dtheta2, theta3,...
               r2, r3, r4, r5, ddr6)
 
 b2 = r2/2;
-b3 = r3/2;
+b3 = r4/2; %We have r4 as the length of link 3
 b5 = r5/2;
 
-I_3 = (1/3)*m3*r4^2;
-I_5 = (1/3)*m5*(r5^2);
+I_3 = (1/3)*m3*r4^2; %about O3 (end)
+I_5 = (1/12)*m5*(r5^2); %about G5 (center)
 
 a_G2x = -b2*dtheta2^2*cos(theta2);
 a_G2y = -b2*dtheta2^2*sin(theta2);

@@ -6,7 +6,7 @@ r1 = 5*10^(-2); % m  o2o
 r2 = 2*10^(-2); % m  o2a
 r4 = 8.5*10^(-2); % m o3B
 r5 = 3*10^(-2); % m BC
-r7 = 10*10^(-2); % m o2o4
+r7 = 10*10^(-2); % m o2o4.
 
 %Driving link parameters
 theta2 = deg2rad(1):deg2rad(1):deg2rad(360); % from 0-360 degrees
